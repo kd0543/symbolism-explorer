@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Black Leather Cult</title>
+
+<style>
+  @font-face {
+    font-family: "Cattedrale";
+    src: url("FONTS/Cattedrale-Demo-Regular.ttf") format("truetype");
+    font-display: swap;
+  }
+
+  html, body {
+    margin: 0;
+    min-height: 100vh;
+    color: #e9e3ef;
+    font-family: ui-serif, Georgia, serif;
+    overflow: hidden;
+    background: #000 url("images/leather-4k.jpg") center/cover fixed no-repeat;
+  }
+
+  header {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 90%;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 5s ease-in-out;
+  }
+  body.all-clicked header { opacity: 0; }
+
+  h1 {
+    margin: 0;
+    font-family: "Cattedrale", serif;
+    font-weight: 400;
+    font-size: clamp(4rem, 10vw, 8rem);
+    background: linear-gradient(180deg,#ffeded 0%,#ff7f7f 10%,#e60000 40%,#990000 75%,#4d0000 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 20px rgba(255,0,0,.9), 0 0 40px rgba(255,0,0,.7), 0 0 60px rgba(255,0,0,.5);
+  }
+
+  #interaction-container {
+    position: fixed; inset: 0; z-index: 10;
+  }
+
+  /* Clickable rips */
+  .rip-target {
+    position: absolute;
+    width: 40px; height: 250px;
+    cursor: pointer;
+    background: url('images/small-rip.png.png') center/contain no-repeat;
+    opacity: .9;
+    transform: rotate(var(--rotate,0deg)) scale(1);
+    filter: drop-shadow(0 0 5px rgba(0,0,0,.5));
+    z-index: 20;
+    transition:
+      top 5s ease-in-out,
+      left 5s ease-in-out,
+      right 5s ease-in-out,
+      transform 5s ease-in-out,
+      opacity .5s ease;
+  }
+  .rip-target:hover { opacity: 1; filter: drop-shadow(0 0 14px rgba(255,0,0,.7)); }
+
+  /* Initial positions */
+  #rip-1 { top: 15%; left: 25%; --rotate: -10deg; z-index: 21; }
+  #rip-2 { top: 10%; left: 50%; transform: translateX(-50%) rotate(5deg); z-index: 22; }
+  #rip-3 { top: 20%; right: 20%; --rotate: 15deg; z-index: 23; }
+
+  /* On click: subtle emphasis but stays in place */
+  .rip-target.clicked {
+    width: 50px; height: 300px;
+    transform: rotate(var(--rotate,0deg)) scale(1.15);
+    filter: drop-shadow(0 0 28px rgba(139,0,0,1));
+    pointer-events: none;
+  }
+
+  /* FINAL POSITIONS after 2s delay + trigger:
+     same horizontal level (50%), each in its own lane */
+  body.all-clicked #rip-1 {
+    top: 50% !important; left: 25% !important; right: auto !important;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1.15) !important;
+    z-index: 31;
+  }
+  body.all-clicked #rip-2 {
+    top: 50% !important; left: 50% !important; right: auto !important;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1.15) !important;
+    z-index: 32;
+  }
+  body.all-clicked #rip-3 {
+    top: 50% !important; left: 75% !important; right: auto !important;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1.15) !important;
+    z-index: 33;
+  }
+
+  /* Blood leak (GIF) containers follow each rip */
+  .blood-leak {
+    position: absolute; top: 50%; left: 50%;
+    width: 150px; height: 0;
+    transform: translate(-50%, -50%);
+    overflow: hidden; opacity: 0;
+    transition: opacity .6s ease-out, height 1.8s ease-out;
+    pointer-events: none;
+    z-index: -1; /* sits visually with the rip */
+  }
+  .blood-leak img {
+    position: absolute; top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%; min-height: 400px; display: none;
+  }
+  .rip-target.active .blood-leak { height: 400px; opacity: 1; }
+  .rip-target.active .blood-leak img { display: block; }
+</style>
+</head>
+
+<body>
+  <header><h1>Black Leather Cult</h1></header>
+
+  <div id="interaction-container">
+    <div class="rip-target" id="rip-1" data-blood-src="images/blood-leak-1.gif">
+      <div class="blood-leak"></div>
+    </div>
+    <div class="rip-target" id="rip-2" data-blood-src="images/blood-leak-2.gif">
+      <div class="blood-leak" id="eye-leak-container"></div>
+    </div>
+    <div class="rip-target" id="rip-3" data-blood-src="images/blood-leak-3.gif">
+      <div class="blood-leak"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const rips = document.querySelectorAll('.rip-target');
+      const eyeLeakContainer = document.getElementById('eye-leak-container');
+      const clicked = new Set();
+      let fired = false;
+
+      // Preload GIFs into each leak container
+      rips.forEach(rip => {
+        const leak = rip.querySelector('.blood-leak');
+        const src = rip.getAttribute('data-blood-src');
+        const img = document.createElement('img');
+        img.src = src; img.alt = 'blood';
+        leak.appendChild(img);
+      });
+
+      rips.forEach(rip => {
+        rip.addEventListener('click', e => {
+          e.stopPropagation();
+          if (!rip.classList.contains('clicked')) {
+            rip.classList.add('clicked', 'active');
+            clicked.add(rip.id);
+          }
+          if (clicked.size === 3 && !fired) {
+            fired = true;
+            // optional cursor state kept from previous logic
+            eyeLeakContainer.classList.add('eye-active');
+
+            // >>>> WAIT 2 SECONDS, THEN ALIGN <<<<
+            setTimeout(() => {
+              document.body.classList.add('all-clicked');
+            }, 2000);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
