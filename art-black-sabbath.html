@@ -36,6 +36,21 @@
     border:1px solid rgba(200,150,255,.22);
     border-radius:12px; padding:18px 18px 22px; line-height:1.6;
   }
+  button {
+  margin-top: 12px;
+  padding: 10px 16px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 8px;
+  background: rgba(0,0,0,.45);
+  color: #ffe8ff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+button:hover {
+  background: rgba(120,0,0,.45);
+}
 </style>
 </head>
 <body>
@@ -43,14 +58,33 @@
   <a class="back" href="blackleathercult.html">← Back to Gallery</a>
   <h1>Black Sabbath</h1>
   <div class="img"><img src="IMAGES/black-sabbath.jpg" alt="Black Sabbath painting"></div>
-  <div class="desc">
-    <!-- Replace this with your preferred wording; placeholder below -->
-    A storm-blue face breaks into a scream—like a church bell struck with lightning.
-    The palette fights between cold blues and raw flesh reds; the mouth becomes a tunnel,
-    a siren, a furnace. This one lives where dread turns sacramental: fear transfigured
-    into awe.
-  </div>
+<div class="desc">
+  A storm-blue face breaks into a scream—like a church bell struck with lightning.
+  The palette fights between cold blues and raw flesh reds; the mouth becomes a tunnel,
+  a siren, a furnace. This one lives where dread turns sacramental: fear transfigured
+  into awe.
+
+  <button id="interpret-btn">Interpret Symbolism</button>
+
+  <p id="interpretation" style="display:none; margin-top:14px;">
+    This composition explores dread, spiritual rupture, and transformation through violent contrast, ritualized expression, and symbolic use of color.
+  </p>
 </div>
+</div>
+  <script>
+  const btn = document.getElementById("interpret-btn");
+  const text = document.getElementById("interpretation");
+
+  btn.addEventListener("click", () => {
+    if (text.style.display === "none") {
+      text.style.display = "block";
+      btn.textContent = "Hide Interpretation";
+    } else {
+      text.style.display = "none";
+      btn.textContent = "Interpret Symbolism";
+    }
+  });
+</script>
 </body>
 </html>
 
